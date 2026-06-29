@@ -98,4 +98,7 @@ Detaylar: [plans/07-mcp-server-ve-araclar.md](plans/07-mcp-server-ve-araclar.md#
 - DTO'lar Java `record` (Lombok `@Builder` ile); entity'ler Lombok `@Data/@Builder`.
 - Connector'lar veriyi entity olarak döner; özetleme (toplam/açık bakiye vb.) yalnızca
   `Customer360Service` içinde yapılır.
-- Detaylı tasarım notları `plans/` klasöründedir (`01-...` → `08-...`).
+- Detaylı tasarım notları `plans/` klasöründedir (`01-...` → `09-...`).
+- "Neden böyle yaptık?" türü kararlar (örn. MCP server tipi neden `SYNC`) →
+  [plans/09-tasarim-kararlari.md](plans/09-tasarim-kararlari.md). Yeni tartışmalı/öğretici
+  karar verildiğinde buraya madde ekleyin.

@@ -44,3 +44,4 @@ CrmConnector OrderConnector BillingConnector SupportConnector   ← sahte dış 
 - [06 — REST API](06-rest-api.md)
 - [07 — MCP Server ve Araçlar](07-mcp-server-ve-araclar.md)
 - [08 — Kurulum, Çalıştırma, Test](08-kurulum-calistirma-test.md)
+- [09 — Tasarım Kararları ve Gerekçeleri](09-tasarim-kararlari.md)
