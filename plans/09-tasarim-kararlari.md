@@ -50,6 +50,48 @@ Aynı `spring-ai-starter-mcp-server-webmvc` starter'ı her ikisini de sağlar; s
 ile yapılır. İkisi de gerçek MCP client (Inspector) ile uçtan uca denenmiş ve çalışır
 durumdadır — bkz. [07 — MCP Server ve Araçlar](07-mcp-server-ve-araclar.md#uçtan-uca-doğrulama-gerçek-mcp-client-ile).
 
+### SSE nedir?
+
+**SSE = Server-Sent Events** (Sunucu Tarafından Gönderilen Olaylar). HTTP üzerinde, sunucunun
+**tek yönlü** olarak istemciye sürekli mesaj "push" edebildiği bir web standardı. Normal
+HTTP'de: istemci sorar → sunucu bir kez cevaplar → bağlantı kapanır. SSE'de: bağlantı **açık
+kalır**, sunucu istediği an veri gönderir (canlı akış/bildirim). Yön tek taraflıdır
+(sunucu→istemci); istemci→sunucu için ayrı bir HTTP isteği gerekir.
+
+### İki transport'un farkı (bağlantı modeli)
+
+İkisi de aynı MCP mesajlarını taşır; fark **bağlantıyı nasıl kurdukları**:
+
+**Klasik HTTP+SSE — "2 kanal":**
+```
+İstemci ── GET /sse ─────────────►  Sunucu
+        ◄═══ SSE akışı (hep açık) ══   ← cevaplar buradan akar
+İstemci ── POST /mcp/message ─────►  Sunucu   ← komutlar buradan gider
+```
+- İki ayrı uç: komut için `POST /mcp/message`, cevaplar için sürekli açık `GET /sse`.
+- Sunucu her istemci için **açık SSE bağlantısını tutmak zorunda** (stateful).
+
+**Streamable HTTP — "tek kanal, esnek":**
+```
+İstemci ── POST /mcp ─────────────►  Sunucu
+        ◄── cevap: ya düz JSON ya da (gerekirse) SSE akışına yükseltilir
+```
+- Tek uç (`/mcp`). Kısa cevap → düz JSON; uzun/çoklu mesaj gerekiyorsa **o anda** SSE'ye geçer.
+  ("Streamable" adı buradan: SSE *gerektiğinde* devreye girer, zorunlu değil.)
+- Sürekli açık bağlantı şart değil → **stateless** çalışabilir, ölçekleme ve proxy/load-balancer
+  arkasında çalışma daha kolay.
+
+| | Klasik HTTP+SSE | Streamable HTTP |
+|---|---|---|
+| Uç sayısı | 2 (`/sse` + `/mcp/message`) | 1 (`/mcp`) |
+| Sunucu→istemci | **Hep açık** SSE akışı | Cevap **JSON veya gerektiğinde** SSE |
+| Bağlantı durumu | Açık tutulmalı (stateful) | Açık tutmak şart değil (stateless olabilir) |
+| Ölçekleme | Zor (her istemci açık bağlantı) | Kolay |
+| Durum | Eskiyen | Güncel/önerilen |
+
+> Benzetme: **klasik** = "sürekli açık telefon hattı + ayrı mektup kutusu"; **streamable** =
+> "tek numarayı ararsın; kısa cevapsa hemen söyler, uzun cevapsa hattı açık tutup anlatır".
+
 ## Araçlar neden `ToolCallbackProvider` ile kaydediliyor?
 
 `Customer360Tools` `@Tool` metotlarını içerir; `McpToolConfig` bunları bir
