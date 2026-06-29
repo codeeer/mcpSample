@@ -29,12 +29,26 @@ basit hem de mevcut mimariyle tutarlı.
 Spring Boot 4'ün tabanı Java 17 olmasına rağmen, MCP için kullandığımız **Spring AI 2.0**
 derleme için **Java 21** gerektiriyor. Detay: [02 — Build ve Bağımlılıklar](02-build-ve-bagimliliklar.md).
 
-## Transport neden HTTP+SSE? (streamable-http değil)
+## Transport neden iki tane? (Klasik HTTP+SSE + Streamable HTTP)
 
-`spring-ai-starter-mcp-server-webmvc` varsayılan olarak **SSE** transport'u açar:
-`GET /sse` → `event:endpoint /mcp/message?sessionId=...`. `/mcp` (streamable-http) bu kurulumda
-404 döner. SSE, MCP Inspector ve Claude Desktop gibi yaygın client'larla doğrudan çalışır.
-Doğrulama: [07 — MCP Server ve Araçlar](07-mcp-server-ve-araclar.md#uçtan-uca-doğrulama-gerçek-mcp-client-ile).
+İki MCP HTTP transport'u vardır ve ikisini de destekliyoruz (aynı anda yalnızca biri açık):
+
+| | **Klasik HTTP+SSE** | **Streamable HTTP** |
+|---|---|---|
+| MCP spec | 2024-11-05 | 2025-03-26 |
+| Uç | `GET /sse` + `POST /mcp/message` (2 uç) | `POST`/`GET` `/mcp` (tek uç) |
+| Akış | `/sse` SSE akışı açar, `endpoint` event'iyle mesaj URL'sini bildirir | `/mcp`'ye POST; cevap düz JSON **veya** SSE olabilir |
+| Aktivasyon | varsayılan (property yok) | `spring.ai.mcp.server.protocol=STREAMABLE` (`streamable` profili) |
+
+**Neden ikisi de var?** Klasik HTTP+SSE yaygın olsa da artık eskimekte; yeni ve önerilen
+standart **Streamable HTTP** (tek uç, hem JSON hem SSE cevabı, Claude'un tercih ettiği). Bu
+örnekte ikisini de bırakarak **farkı canlı karşılaştırılabilir** tutuyoruz:
+- Varsayılan profil → klasik (`/sse` + `/mcp/message`).
+- `streamable` profili → Streamable HTTP (`/mcp`); bu modda `/sse` 404 döner.
+
+Aynı `spring-ai-starter-mcp-server-webmvc` starter'ı her ikisini de sağlar; seçim tek property
+ile yapılır. İkisi de gerçek MCP client (Inspector) ile uçtan uca denenmiş ve çalışır
+durumdadır — bkz. [07 — MCP Server ve Araçlar](07-mcp-server-ve-araclar.md#uçtan-uca-doğrulama-gerçek-mcp-client-ile).
 
 ## Araçlar neden `ToolCallbackProvider` ile kaydediliyor?
 

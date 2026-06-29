@@ -42,10 +42,11 @@ Tarayıcı: `http://localhost:8080/h2-console`
 - Kullanıcı: `sa`, Şifre: (boş)
 - `CRM_CUSTOMER`, `ORDER_RECORD`, `INVOICE`, `TICKET` tablolarında rastgele veriyi görün.
 
-### 3) MCP
-- SSE ucu ayakta mı: `http://localhost:8080/sse`
-- Bir MCP istemcisi (veya Claude) `listCustomers` ve `getCustomer360` araçlarını çağırabilir
-  (bkz. [07 — MCP Server ve Araçlar](07-mcp-server-ve-araclar.md)).
+### 3) MCP (iki transport)
+- **Klasik HTTP+SSE** (varsayılan): `http://localhost:8080/sse` ayakta mı?
+- **Streamable HTTP** (`-Dspring-boot.run.profiles=streamable`): tek uç `http://localhost:8080/mcp`.
+- Bir MCP istemcisi (veya Claude) `listCustomers` / `getCustomer360` araçlarını çağırabilir.
+  Komutlar ve fark tablosu: [07 — MCP Server ve Araçlar](07-mcp-server-ve-araclar.md#transport-iki-seçenek).
 
 ## Testler
 

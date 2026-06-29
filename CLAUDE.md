@@ -75,7 +75,11 @@ arkada H2'deki kendi tablosundan okur. Tüm kaynaklar müşteriyi ortak `custome
   `.../{id}/orders|invoices|tickets`
 - H2 konsolu: `http://localhost:8080/h2-console` — JDBC URL: `jdbc:h2:mem:customer360`,
   kullanıcı `sa`, şifre boş
-- MCP SSE ucu: `http://localhost:8080/sse` (mesaj ucu: `/mcp/message`)
+- MCP transport (iki seçenek, aynı anda biri açık — bkz.
+  [plans/07](plans/07-mcp-server-ve-araclar.md#transport-iki-seçenek)):
+  - **Klasik HTTP+SSE** (varsayılan): `GET /sse` + `POST /mcp/message`
+  - **Streamable HTTP** (`streamable` profili): tek uç `/mcp` —
+    `./mvnw spring-boot:run -Dspring-boot.run.profiles=streamable`
 
 ### Hızlı kontrol
 ```bash
@@ -85,10 +89,13 @@ curl localhost:8080/api/customers/1/360
 
 ### MCP'yi uçtan uca doğrulama (gerçek client)
 ```bash
-npx -y @modelcontextprotocol/inspector --cli http://localhost:8080/sse \
-  --transport sse --method tools/list
+# Klasik HTTP+SSE (varsayılan profil):
 npx -y @modelcontextprotocol/inspector --cli http://localhost:8080/sse \
   --transport sse --method tools/call --tool-name getCustomer360 --tool-arg customerId=1
+
+# Streamable HTTP (streamable profili çalışırken):
+npx -y @modelcontextprotocol/inspector --cli http://localhost:8080/mcp \
+  --transport http --method tools/call --tool-name getCustomer360 --tool-arg customerId=1
 ```
 Detaylar: [plans/07-mcp-server-ve-araclar.md](plans/07-mcp-server-ve-araclar.md#uçtan-uca-doğrulama-gerçek-mcp-client-ile)
 
